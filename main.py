@@ -76,4 +76,5 @@ def ligaPontos(pa,pb,dist):
     pb['distancias'].append(dist)
 
 ligaPontos(mapa[0], mapa[1], 140)
+
 print(mapa[0]['destinos'], mapa[0]['distancias'], mapa[1]['destinos'],mapa[1]['distancias'])
