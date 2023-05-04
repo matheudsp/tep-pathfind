@@ -75,74 +75,50 @@ def ligaPontos(pa, pb, dist):
     pb['destinos'].append(pa['id'])
     pa['distancias'].append(dist)
 
-    # print(pa['destinos'], pa['distancias'], pb['destinos'])
+    print(pa['destinos'], pa['distancias'], pb['destinos'])
 
+def distancia(lat1, lon1, lat2, lon2):
+    return sqrt((lat2 - lat1) ** 2 + (lon2 - lon1) ** 2)
 
-def distancia_entre(p1, p2):
-    return sqrt((p2['latitude'] - p1['latitude']) ** 2 + (p2['longitude'] - p1['longitude']) ** 2)
+def encontrar_caminho(origem, destino, mapa):
+    # Crie um dicionário para armazenar as distâncias percorridas
+    distancias = {ponto['id']: float('inf') for ponto in mapa}
+    distancias[origem] = 0
 
+    # Crie um dicionário para armazenar o caminho percorrido
+    caminho = {ponto['id']: [] for ponto in mapa}
+    caminho[origem] = [origem]
 
-def andarMapa(origem, destino):
-    # Inicializa as listas de nós abertos e fechados
-    abertos = [origem]
-    fechados = []
+    # Crie uma lista para armazenar os pontos visitados
+    visitados = []
 
-    # Dicionário para armazenar os custos
-    custos = {origem['id']: 0}
+    # Comece pelo ponto de origem
+    atual = origem
 
-    # Dicionário para armazenar os pais de cada nó
-    pais = {}
+    while atual != destino:
+        # Adicione o ponto atual à lista de visitados
+        visitados.append(atual)
 
-    while abertos:
-        # Escolhe o nó com o menor custo até agora
-        atual = min(
-            abertos, key=lambda x: custos[x['id']] + distancia_entre(x, destino))
+        # Encontre o destino mais próximo
+        vizinhos = mapa[[ponto['id'] for ponto in mapa].index(atual)]['destinos']
+        dist_vizinhos = mapa[[ponto['id'] for ponto in mapa].index(atual)]['distancias']
+        for i, vizinho in enumerate(vizinhos):
+            if vizinho not in visitados:
+                nova_distancia = distancias[atual] + dist_vizinhos[i] + distancia(mapa[[ponto['id'] for ponto in mapa].index(vizinho)]['latitude'], mapa[[ponto['id'] for ponto in mapa].index(vizinho)]['longitude'], mapa[[ponto['id'] for ponto in mapa].index(destino)]['latitude'], mapa[[ponto['id'] for ponto in mapa].index(destino)]['longitude'])
+                if nova_distancia < distancias[vizinho]:
+                    distancias[vizinho] = nova_distancia
+                    caminho[vizinho] = caminho[atual] + [vizinho]
 
-        # Se chegamos no destino, constrói o caminho e retorna
-        if atual == destino:
-            caminho = [destino['id']]
+        # Se não houver mais vizinhos, pare o loop
+        if not vizinhos:
+            break
 
-            while atual['id'] != origem['id']:
-                caminho.append(pais[atual['id']]['id'])
-                atual = pais[atual['id']]
-            caminho.reverse()
-            print("Caminho encontrado:", caminho)
-            print("Distância total:", custos[destino['id']])
-            return caminho
+        # Selecione o próximo ponto a visitar
+        nao_visitados = {ponto['id']: distancias[ponto['id']] for ponto in mapa if ponto['id'] not in visitados}
+        atual = min(nao_visitados, key=nao_visitados.get)
 
-        # Remove o nó atual da lista de abertos e adiciona na lista de fechados
-        abertos.remove(atual)
-        fechados.append(atual)
-        
-        # Para cada vizinho do nó atual
-        
-        for vizinho_id in atual['destinos']:
-            
-            vizinho = next(item for item in mapa if item["id"] == vizinho_id)
-            if vizinho in fechados:
-                # Se o vizinho já está na lista de fechados, ignora
-                continue
-            
-            # Calcula o custo até o vizinho
-            if vizinho_id in atual['destinos']:
-                novo_custo = custos[atual['id']] + atual['distancias'][atual['destinos'].index(vizinho_id)]
-                if vizinho not in abertos:
-                    abertos.append(vizinho)
-                    # Se o novo custo é maior do que o custo já calculado até o vizinho, ignora
-                elif novo_custo >= custos.get(vizinho['id'], float('inf')):
-                    continue
-            
-            # Atualiza o custo e o pai do vizinho
-                custos[vizinho['id']] = novo_custo
-                pais[vizinho['id']] = atual
-            else:
-                
-                print('vizinho_id não está presente na lista atual[destinos]')
-                
-            
-         
-    # Se não foi possível encontrar um caminho, retorna None
-                
+    # Retorne o caminho e a distância percorrida
+    return caminho[destino], distancias[destino]
         
 if '__main__' == '__main__':
     # ligaPontos(mapa[0], mapa[1], 140)
@@ -150,12 +126,17 @@ if '__main__' == '__main__':
     ligaPontos(mapa[2], mapa[3], 200)
     ligaPontos(mapa[2], mapa[6], 71)
     # ligaPontos(mapa[4], mapa[3], 80)
-    ligaPontos(mapa[5], mapa[4], 121)
-    ligaPontos(mapa[5], mapa[7], 83)
-    ligaPontos(mapa[7], mapa[0], 151)
-    ligaPontos(mapa[6], mapa[4], 99)
-    ligaPontos(mapa[6], mapa[7], 75)
+    # ligaPontos(mapa[5], mapa[4], 121)
+    # ligaPontos(mapa[5], mapa[7], 83)
+    # ligaPontos(mapa[6], mapa[4], 99)
+    # ligaPontos(mapa[6], mapa[7], 75)
 
-    andarMapa(mapa[1], mapa[2])
+    origem = 'P2'
+    destino = 'P3'
+    caminho, distancia_percorrida = encontrar_caminho(origem, destino, mapa)
+
+    # Imprima o resultado
+    print('Caminho:', caminho)
+    print('Distância: ', distancia_percorrida)
 
 
