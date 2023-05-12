@@ -4,64 +4,64 @@ mapa = [
     {
         'id': 1,
         'nome': 'Jorge',
-        'latitude': -6.768548275697400,
-        'longitude': -4.301760423917900,
-        'destinos': [2],
-        'distancias': [140]
+        'latitude': -6.768537311331842, 
+        'longitude': -43.01755245674647,
+        'destinos': [],
+        'distancias': []
     },
     {
         'id': 2,
         'nome': 'Farmácia',
-        'latitude': -6.767962277224870,
-        'longitude': -43.018312302409400,
-        'destinos': [1,3],
-        'distancias': [140,38]
+        'latitude': -6.767967318790024,
+        'longitude': -43.01831420404162,
+        'destinos': [],
+        'distancias': []
     },
     {
         'id': 3,
         'nome': 'Auto Peças Falcão',
-        'latitude': -67.677172334928300,
-        'longitude': -4.301856443005070,
-        'destinos': [2],
-        'distancias': [38]
+        'latitude': -6.76768498578645, 
+        'longitude': -43.018555602832336,
+        'destinos': [],
+        'distancias': []
     },
     {
         'id': 4,
         'nome': 'Subway',
-        'latitude': -6.766944812219210,
-        'longitude': -4.301986261918240,
+        'latitude': -6.766960507889815,
+        'longitude':  -43.0198806139725,
         'destinos': [],
         'distancias': []
     },
     {
         'id': 5,
         'nome': 'Galeria dos Calçados',
-        'latitude': -6.767658636060210,
-        'longitude': -4.301978751733180,
+        'latitude': -6.767637042429814, 
+        'longitude': -43.01980551212649,
         'destinos': [],
         'distancias': []
     },
     {
         'id': 6,
         'nome': 'Pastel do Chinês',
-        'latitude': -67.687240428149800,
-        'longitude': -43.019664135720100,
+        'latitude': -6.768686468147581,
+        'longitude': -43.01967676610478,
         'destinos': [],
         'distancias': []
     },
     {
         'id': 7,
         'nome': 'Apartamento',
-        'latitude': -6.767978258333520,
-        'longitude': -43.019009676736300,
+        'latitude': -6.767977972862394, 
+        'longitude': -43.0190330359962,
         'destinos': [],
         'distancias': []
     },
     {
         'id': 8,
         'nome': 'Paraíba',
-        'latitude': -6.768654791447370,
-        'longitude': -43.018966761393100,
+        'latitude': -6.768654505976653,
+        'longitude':  -43.01894720531506,
         'destinos': [],
         'distancias': []
 
@@ -88,12 +88,12 @@ def distancia_entre_pontos(lat1, lon1, lat2, lon2):
     return distancia
 
 def a_estrela(mapa, origem, destino):
-    # Encontra a melhor rota utilizando o algoritmo A*
+    
     g_score = {}  # custo atual para chegar a cada ponto
     f_score = {}  # custo estimado total para chegar ao destino passando por cada ponto
-    open_set = set()  # pontos a serem explorados
-    closed_set = set()  # pontos já explorados
-    came_from = {}  # mapa de caminhos percorridos
+    nao_explorados = set()  # pontos a serem explorados
+    explorados = set()  # pontos já explorados
+    visitados = {}  # mapa de caminhos percorridos
 
     # Inicializa os dicionários com valores infinitos, exceto para o ponto de origem
     for ponto in mapa:
@@ -102,45 +102,79 @@ def a_estrela(mapa, origem, destino):
     g_score[origem] = 0
     f_score[origem] = distancia_entre_pontos(mapa[origem-1]['latitude'], mapa[origem-1]['longitude'],mapa[destino-1]['latitude'], mapa[destino-1]['longitude'])
 
-    open_set.add(origem)
+    nao_explorados.add(origem)
 
-    while open_set:
+    while nao_explorados:
         # Encontra o ponto com o menor custo estimado total
-        ponto_atual = min(open_set, key=lambda x: f_score[x])
+        ponto_atual = min(nao_explorados, key=lambda x: f_score[x])
 
         if ponto_atual == destino:
             # Caminho encontrado
             caminho = [ponto_atual]
             gasto_total = g_score[ponto_atual]
-            while ponto_atual in came_from:
-                ponto_atual = came_from[ponto_atual]
+            while ponto_atual in visitados:
+                ponto_atual = visitados[ponto_atual]
                 caminho.insert(0, ponto_atual)
             return caminho, gasto_total
 
-        open_set.remove(ponto_atual)
-        closed_set.add(ponto_atual)
+        nao_explorados.remove(ponto_atual)
+        explorados.add(ponto_atual)
 
         for i, adjacente in enumerate(mapa[ponto_atual-1]['destinos']):
-            if adjacente in closed_set:
+            if adjacente in explorados:
                 continue
 
-            custo_atual = g_score[ponto_atual] + mapa[ponto_atual-1]['distancias'][i]
+            custo_atual = g_score[ponto_atual] + mapa[ponto_atual - 1]['distancias'][i]
 
-            if adjacente not in open_set:
-                open_set.add(adjacente)
+            if adjacente not in nao_explorados:
+                nao_explorados.add(adjacente)
             elif custo_atual >= g_score[adjacente]:
                 continue
 
-            came_from[adjacente] = ponto_atual
+            visitados[adjacente] = ponto_atual
             g_score[adjacente] = custo_atual
             f_score[adjacente] = custo_atual + distancia_entre_pontos(mapa[adjacente-1]['latitude'],mapa[adjacente-1]['longitude'],mapa[destino-1]['latitude'],mapa[destino-1]['longitude'])
 
     # Não foi possível encontrar um caminho
     return None, None
 
+def exibir_pontos(mapa):
+    print('\n-------------------------------------------------------------')
+    print("Pontos disponíveis:")
+    for ponto in mapa:
+        print(f"{ponto['id']} - {ponto['nome']}")
+    print('-------------------------------------------------------------\n')
 
+def buscar_caminho(mapa):
+    print('\n-------------------------------------------------------------\n')
+    print("Caminho encontrado:")
+    for ponto in mapa:
+        print(f"{ponto['id']} - {ponto['nome']}")
+    
+    origem = int(input("Digite o ponto de origem: "))
+    destino = int(input("Digite o ponto de destino: "))
 
-if '__main__' == '__main__':
+    caminho, gasto_total = a_estrela(mapa, origem, destino)
+
+    if caminho:
+        print('\n-------------------------------------------------------------\n')
+        print("Caminho encontrado:")
+        for ponto_id in caminho:
+            ponto = mapa[ponto_id-1]
+            print(f"{ponto['id']} - {ponto['nome']}")
+        print('\n-------------------------------------------------------------\n')
+        print(f"Gasto total: {gasto_total}m")
+        print('\n-------------------------------------------------------------\n')
+    else:
+        print("Não foi possível encontrar um caminho entre os pontos de origem e destino.")
+
+def exibir_menu():
+    print("Menu:")
+    print("1. Exibir pontos disponíveis")
+    print("2. Buscar caminho")
+    print("3. Sair")
+
+def main():
     ligaPontos(mapa[0], mapa[1], 140)
     ligaPontos(mapa[1], mapa[2], 38)
     ligaPontos(mapa[2], mapa[3], 200)
@@ -148,20 +182,27 @@ if '__main__' == '__main__':
     ligaPontos(mapa[4], mapa[3], 80)
     ligaPontos(mapa[5], mapa[4], 121)
     ligaPontos(mapa[5], mapa[7], 83)
+    ligaPontos(mapa[7], mapa[0], 160)
     ligaPontos(mapa[6], mapa[4], 99)
-    ligaPontos(mapa[6], mapa[7], 75)
+    ligaPontos(mapa[6], mapa[7], 78)
+
+
+    while True:
+        exibir_menu()
+        opcao = int(input("Digite a opção desejada: "))
+
+        if opcao == 1:
+            exibir_pontos(mapa)
+        elif opcao == 2:
+            buscar_caminho(mapa)
+        elif opcao == 3:
+            break
+        else:
+            print("Opção inválida. Por favor, tente novamente.")
+
+
+if '__main__' == '__main__':
+    main()    
+
     
-    origem = 3
-    destino = 4
-
-    caminho, gasto_total = a_estrela(mapa, origem, destino)
-
-    if caminho:
-        print("Caminho encontrado:")
-        for ponto_id in caminho:
-            ponto = mapa[ponto_id-1]
-            print(f"{ponto['id']} - {ponto['nome']} - Latitude: {ponto['latitude']}, Longitude: {ponto['longitude']}")
-        print(f"Gasto total: {gasto_total}m")
-    else:
-        print("Não foi possível encontrar um caminho entre os pontos de origem e destino.")
     
