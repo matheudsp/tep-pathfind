@@ -95,17 +95,19 @@ def a_estrela(mapa, origem, destino):
     explorados = set()  # pontos já explorados
     visitados = {}  # mapa de caminhos percorridos
 
-    # Inicializa os dicionários com valores infinitos, exceto para o ponto de origem
-    for ponto in mapa:
-        g_score[ponto['id']] = math.inf
+    # Inicializa os dicionários com valores infinitos utilizando o ID do ponto, exceto para o ponto de origem, 
+    # afinal os valores associados a essas chaves ainda não foram determinados ou são desconhecidos.
+    for ponto in mapa:  #percorre cada dicionário de ponto contido na lista mapa.
+        g_score[ponto['id']] = math.inf 
         f_score[ponto['id']] = math.inf
-    g_score[origem] = 0
+    g_score[origem] = 0 # custo atual para chegar ao ponto de origem é 0.
     f_score[origem] = distancia_entre_pontos(mapa[origem-1]['latitude'], mapa[origem-1]['longitude'],mapa[destino-1]['latitude'], mapa[destino-1]['longitude'])
-
+    # atribui o custo estimado total para chegar ao ponto de destino 
     nao_explorados.add(origem)
 
     while nao_explorados:
-        # Encontra o ponto com o menor custo estimado total
+        
+        # encontra o ponto atual a ser explorado com base no menor valor de f_score(menor custo estimado total)
         ponto_atual = min(nao_explorados, key=lambda x: f_score[x])
 
         if ponto_atual == destino:
@@ -120,18 +122,25 @@ def a_estrela(mapa, origem, destino):
         nao_explorados.remove(ponto_atual)
         explorados.add(ponto_atual)
 
+        # Itera sobre os pontos adjacentes ao ponto atual
         for i, adjacente in enumerate(mapa[ponto_atual-1]['destinos']):
+            # Verifica se o ponto adjacente já foi explorado, se sim, passa para o próximo
             if adjacente in explorados:
                 continue
-
+            # Calcula o custo atual para chegar ao ponto adjacente
             custo_atual = g_score[ponto_atual] + mapa[ponto_atual - 1]['distancias'][i]
 
+             # Verifica se o ponto adjacente já foi descoberto ou se o custo atual é maior do que o custo anteriormente calculado
+            # Se sim, passa para o próximo ponto adjacente
             if adjacente not in nao_explorados:
                 nao_explorados.add(adjacente)
             elif custo_atual >= g_score[adjacente]:
                 continue
-
+            
+            # Registra o ponto atual como o caminho percorrido para chegar ao ponto adjacente
             visitados[adjacente] = ponto_atual
+
+            # Atualiza o custo atual e o custo estimado total para chegar ao ponto adjacente
             g_score[adjacente] = custo_atual
             f_score[adjacente] = custo_atual + distancia_entre_pontos(mapa[adjacente-1]['latitude'],mapa[adjacente-1]['longitude'],mapa[destino-1]['latitude'],mapa[destino-1]['longitude'])
 
@@ -147,7 +156,7 @@ def exibir_pontos(mapa):
 
 def buscar_caminho(mapa):
     print('\n-------------------------------------------------------------\n')
-    print("Caminho encontrado:")
+    print("Caminho disponível:")
     for ponto in mapa:
         print(f"{ponto['id']} - {ponto['nome']}")
     
